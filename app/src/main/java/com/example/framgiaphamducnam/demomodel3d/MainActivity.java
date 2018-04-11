@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import com.example.framgiaphamducnam.demomodel3d.utils.ProgressDialogUtil;
@@ -18,18 +19,22 @@ public class MainActivity extends AppCompatActivity {
 
     public UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
     //=================
-    FrameLayout fl_forUnity;
+    private FrameLayout fl_forUnity;
     private RelativeLayout rlLoading;
+    private Button btnNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         rlLoading = findViewById(R.id.rlLoading);
+        btnNext = findViewById(R.id.btnNext);
         rlLoading.setVisibility(View.VISIBLE);
+        btnNext.setVisibility(View.GONE);
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 rlLoading.setVisibility(View.GONE);
+                btnNext.setVisibility(View.VISIBLE);
             }
         }, TIME_LOADING);
         getWindow().setFormat(PixelFormat.RGBX_8888);
@@ -40,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
         fl_forUnity = findViewById(R.id.fl_forUnity);
         fl_forUnity.addView(mUnityPlayer.getView(),
                 FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        mUnityPlayer.requestFocus();
+    }
+
+    private void setupButton(){
+
     }
 
     @Override
