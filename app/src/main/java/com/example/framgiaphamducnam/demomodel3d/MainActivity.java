@@ -1,20 +1,25 @@
 package com.example.framgiaphamducnam.demomodel3d;
 
+import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 import com.example.framgiaphamducnam.demomodel3d.utils.ProgressDialogUtil;
 import com.unity3d.player.UnityPlayer;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private final int TIME_LOADING = 7000;
 
     public UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
@@ -27,6 +32,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        //        WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //if (Build.VERSION.SDK_INT < 16) {
+        //    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //}
+        //else {
+        //    View decorView = getWindow().getDecorView();
+        //    // Show Status Bar.
+        //    int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
+        //    decorView.setSystemUiVisibility(uiOptions);
+        //}
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         rlLoading = findViewById(R.id.rlLoading);
         btnNext = findViewById(R.id.btnNext);
         rlLoading.setVisibility(View.VISIBLE);
@@ -46,6 +64,17 @@ public class MainActivity extends AppCompatActivity {
         fl_forUnity.addView(mUnityPlayer.getView(),
                 FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         mUnityPlayer.requestFocus();
+
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mUnityPlayer.UnitySendMessage("GameManager", "GetListChecked","");
+            }
+        });
+    }
+
+    public void ReturnChecked(String value){
+        Toast.makeText(this, "OK!",Toast.LENGTH_SHORT).show();
     }
 
     private void setupButton(){
