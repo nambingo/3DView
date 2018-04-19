@@ -6,4 +6,10 @@
 
     <color name="colorBackground">#90DBD3</color>
     <color name="color_text">#1D655E</color>
+    <color name="color_gray">#929292</color>
+    <color name="color_gray_bold">#646464</color>
+
+    <color name="dull_teal">#5bafa2</color>
+    <color name="warm_grey_three">#929292</color>
+    <color name="white">#FFFFFF</color>
 </resources>

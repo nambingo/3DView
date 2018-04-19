@@ -3,96 +3,178 @@ package com.example.framgiaphamducnam.demomodel3d;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-import android.os.Build;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-import com.example.framgiaphamducnam.demomodel3d.utils.ProgressDialogUtil;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import com.example.framgiaphamducnam.demomodel3d.screens.CaiDatFragment;
+import com.example.framgiaphamducnam.demomodel3d.screens.KhamOnlineFragment;
+import com.example.framgiaphamducnam.demomodel3d.screens.VietSkinFragment;
+import com.example.framgiaphamducnam.demomodel3d.utils.FragNavController;
 import com.unity3d.player.UnityPlayer;
 
-public class MainActivity extends Activity {
-    private final int TIME_LOADING = 7000;
+/**
+ * Created by FRAMGIA\pham.duc.nam on 18/04/2018.
+ */
 
-    public UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
-    //=================
-    private FrameLayout fl_forUnity;
-    private RelativeLayout rlLoading;
-    private Button btnNext;
+public class MainActivity extends AppCompatActivity
+        implements FragNavController.RootFragmentListener {
+
+    //index for tabs in main screen
+    private final int INDEX_VIET_SKIN = FragNavController.TAB_1;
+    private final int INDEX_KHAM_ONLINE = FragNavController.TAB_2;
+    private final int INDEX_CAI_DAT = FragNavController.TAB_3;
+    public static UnityPlayer mUnityPlayer;
+    //fragment manager
+    public FragNavController mFragNavController;
+    @BindView(R.id.nav)
+    View bottomTab;
+
+    @BindView(R.id.tvVietSkin)
+    TextView tvVietSkin;
+
+    @BindView(R.id.tvKhamOnline)
+    TextView tvKhamOnline;
+
+    @BindView(R.id.tvCaiDat)
+    TextView tvCaiDat;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        //        WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //if (Build.VERSION.SDK_INT < 16) {
-        //    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //}
-        //else {
-        //    View decorView = getWindow().getDecorView();
-        //    // Show Status Bar.
-        //    int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
-        //    decorView.setSystemUiVisibility(uiOptions);
-        //}
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-        rlLoading = findViewById(R.id.rlLoading);
-        btnNext = findViewById(R.id.btnNext);
-        rlLoading.setVisibility(View.VISIBLE);
-        btnNext.setVisibility(View.GONE);
-        new Handler().postDelayed(new Runnable() {
+        setContentView(R.layout.main);
+        ButterKnife.bind(this);
+        setUpUnity();
+        bottomTab.post(new Runnable() {
+            @Override
             public void run() {
-                rlLoading.setVisibility(View.GONE);
-                btnNext.setVisibility(View.VISIBLE);
+                AppApplication.getInstance().setBottomTabHeight(bottomTab.getHeight());
+                mFragNavController =
+                        new FragNavController(savedInstanceState, getSupportFragmentManager(),
+                                R.id.main_content, MainActivity.this, 3, INDEX_VIET_SKIN);
+                selectItem(INDEX_VIET_SKIN);
             }
-        }, TIME_LOADING);
+        });
+    }
+
+    private void setUpUnity() {
+        //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setFormat(PixelFormat.RGBX_8888);
         mUnityPlayer = new UnityPlayer(this);
         int glesMode = mUnityPlayer.getSettings().getInt("gles_mode", 1);
         boolean trueColor8888 = false;
         mUnityPlayer.init(glesMode, trueColor8888);
-        fl_forUnity = findViewById(R.id.fl_forUnity);
-        fl_forUnity.addView(mUnityPlayer.getView(),
-                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-        mUnityPlayer.requestFocus();
-
-        btnNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mUnityPlayer.UnitySendMessage("GameManager", "GetListChecked","");
-            }
-        });
     }
 
     public void ReturnChecked(String value){
+        Log.e("MainActivity", "ReturnChecked:  -----> TOAST");
         Toast.makeText(this, "OK!",Toast.LENGTH_SHORT).show();
     }
 
-    private void setupButton(){
+    @OnClick({ R.id.tvVietSkin, R.id.tvKhamOnline, R.id.tvCaiDat })
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.tvVietSkin:
+                selectItem(INDEX_VIET_SKIN);
+                mFragNavController.switchTab(INDEX_VIET_SKIN);
+                break;
+            case R.id.tvKhamOnline:
+                selectItem(INDEX_KHAM_ONLINE);
+                mFragNavController.switchTab(INDEX_KHAM_ONLINE);
+                break;
+            case R.id.tvCaiDat:
+                selectItem(INDEX_CAI_DAT);
+                mFragNavController.switchTab(INDEX_CAI_DAT);
+                break;
+        }
+    }
 
+    @Override
+    public Fragment getRootFragment(int index) {
+        switch (index) {
+            case INDEX_VIET_SKIN:
+                return new VietSkinFragment();
+            case INDEX_KHAM_ONLINE:
+                return new KhamOnlineFragment();
+            case INDEX_CAI_DAT:
+                return new CaiDatFragment();
+        }
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mFragNavController.canPop()) {
+            mFragNavController.pop();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public void pushFragment(Fragment fragment) {
+        if (mFragNavController != null) {
+            mFragNavController.push(fragment);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mFragNavController != null) {
+            mFragNavController.onSaveInstanceState(outState);
+        }
+    }
+
+    private void selectItem(int INDEX) {
+        tvVietSkin.setEnabled(true);
+        tvKhamOnline.setEnabled(true);
+        tvCaiDat.setEnabled(true);
+
+        switch (INDEX) {
+            case INDEX_VIET_SKIN:
+                tvVietSkin.setEnabled(false);
+                tvVietSkin.setSelected(true);
+                tvKhamOnline.setSelected(false);
+                tvCaiDat.setSelected(false);
+                break;
+            case INDEX_KHAM_ONLINE:
+                tvKhamOnline.setEnabled(false);
+                tvVietSkin.setSelected(false);
+                tvKhamOnline.setSelected(true);
+                tvCaiDat.setSelected(false);
+                break;
+            case INDEX_CAI_DAT:
+                tvCaiDat.setEnabled(false);
+                tvVietSkin.setSelected(false);
+                tvKhamOnline.setSelected(false);
+                tvCaiDat.setSelected(true);
+                break;
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mUnityPlayer.resume();
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        fl_forUnity.removeAllViewsInLayout();
-        fl_forUnity.removeAllViews();
         mUnityPlayer.quit();
     }
 
@@ -120,8 +202,7 @@ public class MainActivity extends Activity {
     // Force event injection by overriding dispatchKeyEvent().
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_MULTIPLE)
-            return mUnityPlayer.injectEvent(event);
+        if (event.getAction() == KeyEvent.ACTION_MULTIPLE) return mUnityPlayer.injectEvent(event);
         return super.dispatchKeyEvent(event);
     }
 
