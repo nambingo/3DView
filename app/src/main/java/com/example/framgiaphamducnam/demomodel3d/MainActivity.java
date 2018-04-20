@@ -1,35 +1,36 @@
 package com.example.framgiaphamducnam.demomodel3d;
 
-import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.example.framgiaphamducnam.demomodel3d.screens.CaiDatFragment;
-import com.example.framgiaphamducnam.demomodel3d.screens.KhamOnlineFragment;
-import com.example.framgiaphamducnam.demomodel3d.screens.VietSkinFragment;
+import com.example.framgiaphamducnam.demomodel3d.base.BaseActivity;
+import com.example.framgiaphamducnam.demomodel3d.screens.khamonline.KhamOnlineFragment;
+import com.example.framgiaphamducnam.demomodel3d.screens.setting.CaiDatFragment;
+import com.example.framgiaphamducnam.demomodel3d.screens.vietskin.VietSkinFragment;
 import com.example.framgiaphamducnam.demomodel3d.utils.FragNavController;
+import com.google.gson.Gson;
 import com.unity3d.player.UnityPlayer;
 
 /**
  * Created by FRAMGIA\pham.duc.nam on 18/04/2018.
  */
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements FragNavController.RootFragmentListener {
 
+    private static int[] Data = {0, 1, 2};
+    String mStringData = "";
     //index for tabs in main screen
     private final int INDEX_VIET_SKIN = FragNavController.TAB_1;
     private final int INDEX_KHAM_ONLINE = FragNavController.TAB_2;
@@ -39,6 +40,15 @@ public class MainActivity extends AppCompatActivity
     public FragNavController mFragNavController;
     @BindView(R.id.nav)
     View bottomTab;
+
+    @BindView(R.id.rlVietSkin)
+    RelativeLayout rlVietSkin;
+
+    @BindView(R.id.rlKhamOnline)
+    RelativeLayout rlKhamOnline;
+
+    @BindView(R.id.rlCaiDat)
+    RelativeLayout rlCaiDat;
 
     @BindView(R.id.tvVietSkin)
     TextView tvVietSkin;
@@ -52,8 +62,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        ButterKnife.bind(this);
         setUpUnity();
         bottomTab.post(new Runnable() {
             @Override
@@ -65,6 +73,16 @@ public class MainActivity extends AppCompatActivity
                 selectItem(INDEX_VIET_SKIN);
             }
         });
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.main;
+    }
+
+    @Override
+    protected void createView() {
+
     }
 
     private void setUpUnity() {
@@ -81,22 +99,30 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void ReturnChecked(String value){
-        Log.e("MainActivity", "ReturnChecked:  -----> TOAST");
-        Toast.makeText(this, "OK!",Toast.LENGTH_SHORT).show();
+        getData(Data);
     }
 
-    @OnClick({ R.id.tvVietSkin, R.id.tvKhamOnline, R.id.tvCaiDat })
+    public void getData(int[] Data){
+        mStringData = new Gson().toJson(Data);
+    }
+
+    public String sendData(){
+        if (TextUtils.isEmpty(mStringData)) return null;
+        return mStringData;
+    }
+
+    @OnClick({ R.id.rlVietSkin, R.id.rlKhamOnline, R.id.rlCaiDat })
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.tvVietSkin:
+            case R.id.rlVietSkin:
                 selectItem(INDEX_VIET_SKIN);
                 mFragNavController.switchTab(INDEX_VIET_SKIN);
                 break;
-            case R.id.tvKhamOnline:
+            case R.id.rlKhamOnline:
                 selectItem(INDEX_KHAM_ONLINE);
                 mFragNavController.switchTab(INDEX_KHAM_ONLINE);
                 break;
-            case R.id.tvCaiDat:
+            case R.id.rlCaiDat:
                 selectItem(INDEX_CAI_DAT);
                 mFragNavController.switchTab(INDEX_CAI_DAT);
                 break;
@@ -119,15 +145,43 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         if (mFragNavController.canPop()) {
-            mFragNavController.pop();
+            mFragNavController.pop(0,0);
         } else {
             super.onBackPressed();
         }
     }
 
+    //protected void showFragment(Fragment fragment) {
+    //
+    //    String TAG = fragment.getClass().getSimpleName();
+    //    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+    //
+    //    fragmentTransaction.replace(R.id.mainContainer, fragment, TAG);
+    //    fragmentTransaction.addToBackStack(null);
+    //    fragmentTransaction.commitAllowingStateLoss();
+    //}
+
     public void pushFragment(Fragment fragment) {
         if (mFragNavController != null) {
-            mFragNavController.push(fragment);
+            mFragNavController.push(fragment, R.anim.enter_from_right, R.anim.exit_to_left);
+        }
+    }
+
+    public void popFragment(){
+        if (mFragNavController != null) {
+            mFragNavController.pop(R.anim.enter_from_left, R.anim.exit_to_right);
+        }
+    }
+
+    public void pushFragmentQ1(Fragment fragment) {
+        if (mFragNavController != null) {
+            mFragNavController.push(fragment, 0, 0);
+        }
+    }
+
+    public void popFragmentQ1(){
+        if (mFragNavController != null) {
+            mFragNavController.pop(0, 0);
         }
     }
 

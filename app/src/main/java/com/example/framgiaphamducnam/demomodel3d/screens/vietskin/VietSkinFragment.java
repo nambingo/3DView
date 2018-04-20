@@ -1,26 +1,25 @@
-package com.example.framgiaphamducnam.demomodel3d.screens;
+package com.example.framgiaphamducnam.demomodel3d.screens.vietskin;
 
-import android.content.Intent;
-import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.example.framgiaphamducnam.demomodel3d.MainActivity;
 import com.example.framgiaphamducnam.demomodel3d.R;
-import com.unity3d.player.UnityPlayer;
+import com.example.framgiaphamducnam.demomodel3d.utils.DialogUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 import static com.example.framgiaphamducnam.demomodel3d.MainActivity.mUnityPlayer;
 
@@ -31,15 +30,14 @@ import static com.example.framgiaphamducnam.demomodel3d.MainActivity.mUnityPlaye
 public class VietSkinFragment extends Fragment {
 
     protected View mView;
-
     @BindView(R.id.rlLoading)
     RelativeLayout rlLoading;
-
-    //@BindView(R.id.btnNext)
+    @BindView(R.id.btnNext)
     Button btnNext;
     @BindView(R.id.fl_forUnity)
     FrameLayout fl_forUnity;
-
+    private int[] resultData;
+    private String mData;
     private MainActivity mActivity;
 
     @Nullable
@@ -56,15 +54,6 @@ public class VietSkinFragment extends Fragment {
     }
 
     private void initData() {
-        btnNext = (Button)mView.findViewById(R.id.btnNext);
-        btnNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e("VietSkinFragment", "onClick:  -----> ");
-                mUnityPlayer.UnitySendMessage("GameManager", "GetListChecked","");
-            }
-        });
-
         rlLoading.setVisibility(View.VISIBLE);
         btnNext.setVisibility(View.GONE);
         new Handler().postDelayed(new Runnable() {
@@ -73,19 +62,36 @@ public class VietSkinFragment extends Fragment {
                 btnNext.setVisibility(View.VISIBLE);
             }
         }, 5000);
-        
-
-
 
         fl_forUnity.addView(mUnityPlayer.getView(), FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
         mUnityPlayer.requestFocus();
     }
 
-    //@OnClick(R.id.btnNext)
-    //public void onNext(){
-    //    Log.e("VietSkinFragment", "onNext:  -----> ");
-    //    //mUnityPlayer.UnitySendMessage("GameManager", "GetListChecked","");
-    //}
+    @OnClick(R.id.btnNext)
+    public void onNext() {
+        mUnityPlayer.UnitySendMessage("GameManager", "GetListChecked", "");
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                receiveData();
+            }
+        }, 1000);
+    }
 
+    private void receiveData() {
+        if (TextUtils.isEmpty(mActivity.sendData())) return;
+        Type type = new TypeToken<int[]>() {
+        }.getType();
+        resultData = new Gson().fromJson(mActivity.sendData(), type);
+        if (resultData.length == 0) {
+            DialogUtils.showDialogAlert(mActivity);
+        } else {
+            toQuestion1();
+        }
+    }
+
+    private void toQuestion1() {
+        mActivity.pushFragmentQ1(new Question1Fragment());
+    }
 }
