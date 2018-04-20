@@ -9,6 +9,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import com.example.framgiaphamducnam.demomodel3d.R;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -209,10 +211,12 @@ public class FragNavController {
      *
      * @param fragment The fragment that is to be pushed
      */
-    public void push(Fragment fragment) {
+    public void push(Fragment fragment, int enter, int exit) {
         if (fragment != null) {
 
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            //ft.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left);
+            ft.setCustomAnimations(enter, exit);
             ft.setTransition(mTransitionMode);
             detachCurrentFragment(ft);
             ft.add(mContainerId, fragment, generateTag(fragment));
@@ -233,10 +237,13 @@ public class FragNavController {
     /**
      * Pop the current fragment from the current tab
      */
-    public void pop() {
+    public void pop(int enter, int exit) {
         Fragment poppingFrag = getCurrentFrag();
         if (poppingFrag != null) {
+            Log.e("FragNavController", "pop:  -----> ");
             FragmentTransaction ft = mFragmentManager.beginTransaction();
+            //ft.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+            ft.setCustomAnimations(enter, exit);
             ft.setTransition(mTransitionMode);
             ft.remove(poppingFrag);
 
