@@ -3,4 +3,13 @@
 
     <string name="next">Tiếp Tục</string>
     <string name="alert_select_position">Vui lòng chọn vị trí mắc bệnh</string>
+    <string name="q1_khong_co_trieu_chung">Không có triệu chứng</string>
+    <string name="q1_cham_chich">Châm chích</string>
+    <string name="q1_rat">Rát</string>
+    <string name="q1_dau">Đau</string>
+    <string name="q1_ngua">Ngứa</string>
+    <string name="q2_vai_nam">Vài năm</string>
+    <string name="q2_vai_gio">Vài giờ</string>
+    <string name="q2_vai_ngay">Vài ngày</string>
+    <string name="q2_vai_thang">Vài tháng</string>ày
 </resources>
